@@ -1,5 +1,5 @@
 {
-  "name": "@benshabbat/express-crud-generator",
+  "name": "lazy-express-crud",
   "version": "1.0.0",
   "description": "CLI tool to instantly generate a complete Express.js CRUD API with ES6 modules",
   "main": "generateExpressCrud.js",
