@@ -8,8 +8,8 @@ const resourceName = process.argv[2];
 
 if (!resourceName) {
     console.error('❌ Error: Please provide a resource name');
-    console.log('\nUsage: add-crud-resource <ResourceName>');
-    console.log('Example: add-crud-resource User');
+    console.log('\nUsage: add-crud <ResourceName>');
+    console.log('Example: add-crud User');
     process.exit(1);
 }
 
@@ -302,12 +302,50 @@ files.forEach(file => {
     }
 });
 
+// Update server.js
+const serverPath = path.join(srcDir, 'server.js');
+try {
+    let serverContent = fs.readFileSync(serverPath, 'utf8');
+    
+    // Check if route already imported
+    const importStatement = `import ${resourceLower}Routes from './routes/${routeFileName}';`;
+    if (!serverContent.includes(importStatement)) {
+        // Find the last import statement
+        const importRegex = /import .+ from .+;/g;
+        const imports = serverContent.match(importRegex);
+        if (imports && imports.length > 0) {
+            const lastImport = imports[imports.length - 1];
+            serverContent = serverContent.replace(lastImport, `${lastImport}\n${importStatement}`);
+        }
+    }
+    
+    // Check if route already registered
+    const routeStatement = `app.use('/api/${resourcePlural}', ${resourceLower}Routes);`;
+    if (!serverContent.includes(routeStatement)) {
+        // Find where to add the route (after other app.use routes)
+        const routeRegex = /app\.use\('\/api\/\w+',\s+\w+Routes\);/g;
+        const routes = serverContent.match(routeRegex);
+        if (routes && routes.length > 0) {
+            const lastRoute = routes[routes.length - 1];
+            serverContent = serverContent.replace(lastRoute, `${lastRoute}\n${routeStatement}`);
+        } else {
+            // If no routes exist, add after items route
+            const itemsRoute = "app.use('/api/items', itemRoutes);";
+            if (serverContent.includes(itemsRoute)) {
+                serverContent = serverContent.replace(itemsRoute, `${itemsRoute}\n${routeStatement}`);
+            }
+        }
+    }
+    
+    fs.writeFileSync(serverPath, serverContent);
+    console.log(`✅ Updated server.js with ${resourceName} routes`);
+} catch (error) {
+    console.log(`⚠️  Note: Could not automatically update server.js: ${error.message}`);
+    console.log('Please add the routes manually.');
+}
+
 console.log(`\n✨ CRUD resource "${resourceName}" created successfully!\n`);
-console.log('📝 Next steps:');
-console.log(`\n1. Import the routes in your server.js:`);
-console.log(`   import ${resourceLower}Routes from './routes/${routeFileName}';`);
-console.log(`   app.use('/api/${resourcePlural}', ${resourceLower}Routes);`);
-console.log(`\n2. Your new endpoints:`);
+console.log('📝 Your new endpoints are ready:');
 console.log(`   GET    /api/${resourcePlural}      - Get all ${resourcePlural}`);
 console.log(`   GET    /api/${resourcePlural}/:id  - Get ${resourceLower} by id`);
 console.log(`   POST   /api/${resourcePlural}      - Create ${resourceLower}`);

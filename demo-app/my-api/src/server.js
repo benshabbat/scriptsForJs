@@ -2,7 +2,6 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import itemRoutes from './routes/itemRoutes.js';
-import authorRoutes from './routes/authorRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,7 +26,6 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/items', itemRoutes);
-app.use('/api/authors', authorRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
