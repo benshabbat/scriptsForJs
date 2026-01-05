@@ -5,6 +5,7 @@
   "main": "generateExpressCrud.js",
   "type": "commonjs",
   "bin": {
+    "lazy-express-crud": "./generateExpressCrud.js",
     "create-express-crud": "./generateExpressCrud.js",
     "add-crud-resource": "./addCrudResource.js"
   },
